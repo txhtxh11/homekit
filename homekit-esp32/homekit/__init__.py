@@ -5,16 +5,15 @@ from esphome.components import mdns, wifi, light, lock, sensor, switch, climate,
 from esphome.const import PLATFORM_ESP32, CONF_ID, CONF_TRIGGER_ID
 from esphome.core import ID, Lambda
 from esphome.components.esp32 import add_idf_component
-from .. import homekit_base
 
-AUTO_LOAD = ["homekit_base"]
-DEPENDENCIES = ['esp32', 'network', 'homekit_base']
+AUTO_LOAD = []
+DEPENDENCIES = ['esp32', 'network']
 CODEOWNERS = ["@rednblkx"]
 
-homekit_ns = homekit_base.homekit_ns
-HAPRootComponent = homekit_base.HAPRootComponent
-TemperatureUnits = homekit_ns.enum("TemperatureUnits")
+homekit_ns = cg.esphome_ns.namespace('homekit')
+HAPRootComponent = homekit_ns.class_('HAPRootComponent', cg.Component)
 AInfo = homekit_ns.enum("AInfo")
+TemperatureUnits = homekit_ns.enum("TemperatureUnits")
 HKFinish = homekit_ns.enum("HKFinish")
 HAPAccessory = homekit_ns.class_('HAPAccessory', cg.Component)
 LightEntity = homekit_ns.class_('LightEntity')
@@ -22,6 +21,7 @@ SensorEntity = homekit_ns.class_('SensorEntity')
 SwitchEntity = homekit_ns.class_('SwitchEntity')
 LockEntity = homekit_ns.class_('LockEntity')
 FanEntity = homekit_ns.class_('FanEntity')
+ClimateEntity = homekit_ns.class_('ClimateEntity')
 OnHkSuccessTrigger = homekit_ns.class_(
     "HKAuthTrigger", automation.Trigger.template(cg.std_string, cg.std_string)
 )

@@ -1,1 +1,3 @@
-# HomeKit Components for ESPHome\n\nESP8266 和 ESP32 的 HomeKit 外部组件集合。
+# HomeKit ESP Components
+
+ESP32/ESP8266 HomeKit components for ESPHome - only homekit core component kept
