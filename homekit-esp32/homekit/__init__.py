@@ -40,7 +40,6 @@ def _ensure_hap_sdk():
         ("mu_srp", "components/homekit/mu_srp"),
     ):
         add_idf_component(name=name, repo=sdk_repo, ref=sdk_ref, path=sub)
-    add_idf_component(name="espressif/libsodium", ref="^1.0.20~1")
 
 homekit_ns = cg.esphome_ns.namespace('homekit')
 HAPRootComponent = homekit_ns.class_('HAPRootComponent', cg.Component)
