@@ -3,7 +3,7 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import mdns, wifi, light, lock, sensor, switch, climate, pn532, fan
 from esphome.const import PLATFORM_ESP32, CONF_ID, CONF_TRIGGER_ID, Framework
-from esphome.core import ID, Lambda
+from esphome.core import CORE, ID, Lambda
 from esphome.components.esp32 import add_idf_component
 
 # ESPHome 2026.9.0 removed cv.only_with_esp_idf; use only_with_framework(Framework.ESP_IDF)
@@ -29,6 +29,12 @@ def _ensure_hap_sdk():
     if _hap_sdk_added:
         return
     _hap_sdk_added = True
+    # esp_hap_core pulls Espressif libsodium via its idf_component.yml; tell
+    # ESPHome's PlatformIO build to ignore its own libsodium so the two are
+    # not both registered as project_managed_components.
+    if getattr(CORE, "using_toolchain_esp_idf", False):
+        cg.add_platformio_option("lib_ignore", ["libsodium"])
+    add_idf_component(name="espressif/libsodium", ref="^1.0.20~1")
     sdk_repo = "https://github.com/rednblkx/esp-homekit-sdk"
     sdk_ref = "esphome"
     for name, sub in (
