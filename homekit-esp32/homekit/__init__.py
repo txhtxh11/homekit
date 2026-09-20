@@ -18,6 +18,30 @@ AUTO_LOAD = []
 DEPENDENCIES = ['esp32', 'network']
 CODEOWNERS = ["@rednblkx"]
 
+# The HAP core SDK libraries provide the C headers used by every entity type
+# (<hap.h>, <hap_apple_chars.h>, <hap_apple_servs.h>). They must be declared
+# whenever this component is used, independent of the NFC/HomeKey lock path.
+_hap_sdk_added = False
+
+
+def _ensure_hap_sdk():
+    global _hap_sdk_added
+    if _hap_sdk_added:
+        return
+    _hap_sdk_added = True
+    sdk_repo = "https://github.com/rednblkx/esp-homekit-sdk"
+    sdk_ref = "esphome"
+    for name, sub in (
+        ("esp_hap_core", "components/homekit/esp_hap_core"),
+        ("esp_hap_apple_profiles", "components/homekit/esp_hap_apple_profiles"),
+        ("esp_hap_extras", "components/homekit/esp_hap_extras"),
+        ("esp_hap_platform", "components/homekit/esp_hap_platform"),
+        ("hkdf-sha", "components/homekit/hkdf-sha"),
+        ("mu_srp", "components/homekit/mu_srp"),
+    ):
+        add_idf_component(name=name, repo=sdk_repo, ref=sdk_ref, path=sub)
+    add_idf_component(name="espressif/libsodium", ref="^1.0.20~1")
+
 homekit_ns = cg.esphome_ns.namespace('homekit')
 HAPRootComponent = homekit_ns.class_('HAPRootComponent', cg.Component)
 AInfo = homekit_ns.enum("AInfo")
@@ -88,6 +112,7 @@ cv.only_on([PLATFORM_ESP32]),
 _only_with_esp_idf)
 
 async def to_code(config):
+    _ensure_hap_sdk()
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     if 'light' in config:
