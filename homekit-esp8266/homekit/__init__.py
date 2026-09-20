@@ -53,7 +53,7 @@ def to_code(config):
     # Pinned to a fork that builds under ESPHome's -DNO_GLOBAL_MDNS (Arduino core 3.1+).
     # Upstream Mixiaoxiao/Arduino-HomeKit-ESP8266 relies on the global `MDNS`
     # instance, which ESPHome's mdns component compiles out.
-    cg.add_library("HomeKit-ESP8266", "ce420d0b2ebc5f97b457a65ac6083b6e608db151",
+    cg.add_library("HomeKit-ESP8266", "2d25affe20205af44752fc5db7c62b6687c04285",
         "https://hk.gh-proxy.org/https://github.com/txhtxh11/Arduino-HomeKit-ESP8266.git")
     cg.add_build_flag("-DARDUINO_HOMEKIT_LOWROM")
     cg.add_build_flag("-DHOMEKIT_LOG_LEVEL=0")
