@@ -2,9 +2,17 @@ from esphome import automation
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import mdns, wifi, light, lock, sensor, switch, climate, pn532, fan
-from esphome.const import PLATFORM_ESP32, CONF_ID, CONF_TRIGGER_ID
+from esphome.const import PLATFORM_ESP32, CONF_ID, CONF_TRIGGER_ID, Framework
 from esphome.core import ID, Lambda
 from esphome.components.esp32 import add_idf_component
+
+# ESPHome 2026.9.0 removed cv.only_with_esp_idf; use only_with_framework(Framework.ESP_IDF)
+# while keeping compatibility with older ESPHome versions.
+if hasattr(cv, "only_with_esp_idf"):
+    _only_with_esp_idf = cv.only_with_esp_idf
+else:
+    def _only_with_esp_idf(obj):
+        return cv.only_with_framework(Framework.ESP_IDF)(obj)
 
 AUTO_LOAD = []
 DEPENDENCIES = ['esp32', 'network']
@@ -77,7 +85,7 @@ CONFIG_SCHEMA = cv.All(cv.Schema({
     cv.Optional("climate"):  cv.ensure_list({cv.Required(CONF_ID): cv.use_id(climate.Climate), cv.Optional("meta") : ACCESSORY_INFORMATION}),
 }).extend(cv.COMPONENT_SCHEMA),
 cv.only_on([PLATFORM_ESP32]),
-cv.only_with_esp_idf)
+_only_with_esp_idf)
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
