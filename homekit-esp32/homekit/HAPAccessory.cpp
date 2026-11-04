@@ -6,6 +6,14 @@ namespace esphome
     HAPAccessory::HAPAccessory() {
     }
     void HAPAccessory::setup() {
+      // hap_set_setup_code() 必须在 hap_init() 之前；hap_start() 必须在所有配件都加进数据库之后
+      if (!this->setup_code_.empty()) {
+        hap_set_setup_code(this->setup_code_.c_str());
+      }
+      int ret = hap_init(HAP_TRANSPORT_WIFI);
+      if (ret != HAP_SUCCESS) {
+        ESP_LOGE(TAG, "hap_init failed: %d", ret);
+      }
       #ifdef USE_LIGHT
       for (const auto v : lights) {
         v->setup();
@@ -47,6 +55,13 @@ namespace esphome
         v->setup();
       }
       #endif
+      // 配件都进数据库之后再启动 HAP
+      ret = hap_start();
+      if (ret != HAP_SUCCESS) {
+        ESP_LOGE(TAG, "hap_start failed: %d", ret);
+      } else {
+        ESP_LOGI(TAG, "HomeKit started (setup code %s)", this->setup_code_.empty() ? "default" : this->setup_code_.c_str());
+      }
     }
     void HAPAccessory::dump_config() {
       #ifdef USE_LOCK

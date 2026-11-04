@@ -114,6 +114,7 @@ CONFIG_SCHEMA = cv.All(cv.Schema({
     cv.Optional("fan"):  cv.ensure_list({cv.Required(CONF_ID): cv.use_id(fan.Fan), cv.Optional("meta") : ACCESSORY_INFORMATION}),
     cv.Optional("switch"):  cv.ensure_list({cv.Required(CONF_ID): cv.use_id(switch.Switch), cv.Optional("meta") : ACCESSORY_INFORMATION}),
     cv.Optional("climate"):  cv.ensure_list({cv.Required(CONF_ID): cv.use_id(climate.Climate), cv.Optional("meta") : ACCESSORY_INFORMATION}),
+    cv.Optional("setup_code"): cv.string,
 }).extend(cv.COMPONENT_SCHEMA),
 cv.only_on([PLATFORM_ESP32]),
 _only_with_esp_idf)
@@ -122,6 +123,8 @@ async def to_code(config):
     _ensure_hap_sdk()
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
+    if "setup_code" in config:
+        cg.add(var.set_setup_code(config["setup_code"]))
     if 'light' in config:
         for l in config["light"]:
             light_entity = cg.Pvariable(ID(f"{l['id'].id}_hk_light_entity", type=LightEntity), var.add_light(await cg.get_variable(l['id'])))

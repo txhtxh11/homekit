@@ -37,6 +37,9 @@ namespace esphome
       float get_setup_priority() const override { return setup_priority::AFTER_WIFI + 1; }
       void setup() override;
       void dump_config() override;
+      // 配对码必须在 hap_init() 之前设置，setup() 里第一件事就是它
+      void set_setup_code(const char* code) { this->setup_code_ = code == nullptr ? "" : code; }
+      std::string setup_code_;
       #ifdef USE_HOMEKEY
       pn532::PN532* nfc = nullptr;
       HKFinish hkHwFinish = SILVER;
