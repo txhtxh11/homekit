@@ -1,7 +1,7 @@
 from esphome import automation
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import mdns, wifi, light, lock, sensor, switch, climate, pn532, fan
+from esphome.components import mdns, wifi, light, lock, sensor, switch, climate, pn532, fan, binary_sensor
 from esphome.const import PLATFORM_ESP32, CONF_ID, CONF_TRIGGER_ID, Framework
 from esphome.core import CORE, ID, Lambda
 from esphome.components.esp32 import add_idf_component
@@ -55,6 +55,7 @@ HKFinish = homekit_ns.enum("HKFinish")
 HAPAccessory = homekit_ns.class_('HAPAccessory', cg.Component)
 LightEntity = homekit_ns.class_('LightEntity')
 SensorEntity = homekit_ns.class_('SensorEntity')
+BinarySensorEntity = homekit_ns.class_('BinarySensorEntity')
 SwitchEntity = homekit_ns.class_('SwitchEntity')
 LockEntity = homekit_ns.class_('LockEntity')
 FanEntity = homekit_ns.class_('FanEntity')
@@ -109,6 +110,7 @@ CONFIG_SCHEMA = cv.All(cv.Schema({
         cv.Optional("meta") : ACCESSORY_INFORMATION
         }),
     cv.Optional("sensor"):  cv.ensure_list({cv.Required(CONF_ID): cv.use_id(sensor.Sensor), cv.Optional("temp_units", default="CELSIUS") : cv.enum(TEMP_UNITS), cv.Optional("meta") : ACCESSORY_INFORMATION}),
+    cv.Optional("binary_sensor"):  cv.ensure_list({cv.Required(CONF_ID): cv.use_id(binary_sensor.BinarySensor), cv.Optional("type", default="motion") : cv.one_of("motion", "contact", "door", "window", "occupancy", "smoke", lower=True), cv.Optional("meta") : ACCESSORY_INFORMATION}),
     cv.Optional("fan"):  cv.ensure_list({cv.Required(CONF_ID): cv.use_id(fan.Fan), cv.Optional("meta") : ACCESSORY_INFORMATION}),
     cv.Optional("switch"):  cv.ensure_list({cv.Required(CONF_ID): cv.use_id(switch.Switch), cv.Optional("meta") : ACCESSORY_INFORMATION}),
     cv.Optional("climate"):  cv.ensure_list({cv.Required(CONF_ID): cv.use_id(climate.Climate), cv.Optional("meta") : ACCESSORY_INFORMATION}),
@@ -136,6 +138,14 @@ async def to_code(config):
                 for m in l["meta"]:
                     info_temp.append([ACC_INFO[m], l["meta"][m]])
                 cg.add(sensor_entity.setInfo(info_temp))
+    if 'binary_sensor' in config:
+        for l in config["binary_sensor"]:
+            bin_entity = cg.Pvariable(ID(f"{l['id'].id}_hk_binary_entity", type=BinarySensorEntity), var.add_binary_sensor(await cg.get_variable(l['id']), l['type']))
+            if "meta" in l:
+                info_temp = []
+                for m in l["meta"]:
+                    info_temp.append([ACC_INFO[m], l["meta"][m]])
+                cg.add(bin_entity.setInfo(info_temp))
     if 'lock' in config:
         for l in config["lock"]:
             lock_entity = cg.Pvariable(ID(f"{l['id'].id}_hk_lock_entity", type=LockEntity), var.add_lock(await cg.get_variable(l['id'])))
